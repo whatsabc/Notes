@@ -200,8 +200,16 @@ MOV BX,OFFSET [2016H]
 ②.CF位已在指令中给出其影响情况
 
 ## 4.串操作指令
+### 1.MOVS串传送指令
+- MOVSB
+- MOVSW
 - MOVS
-- CMPS
-- SCAS
-- STOS
-- LODS
+实际上MOVS指令的寻址方式是固定的，目的串地址为ES:[DI]，原串地址为DS:[SI]
+```
+MOVS ES:BYTE PTR[DI],DS:[SI]
+```
+下面介绍前两种格式的操作
+### 2.CMPS
+### 3.SCAS
+### 4.STOS
+### 5.LODS
