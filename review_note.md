@@ -339,12 +339,15 @@ MOV BUF,AX
 表达式BUF=THIS WORD使BUF和DAT指向同一个内存单元
 
 LABEL伪操作使得OPR_B和OPR_W指向同一个内存单元
-```
+
 执行前
+```
 BUF   OPR_B
 DAT   OPR_W
 08 09 02 00 02 00
+```
 执行后
+```
 BUF   OPR_B
 DAT   OPR_W
 34 12 34 00 34 12
@@ -392,7 +395,44 @@ BUFF DB 6
 ORG $+6
 VAL DB 9
 ```
+执行后内存中的存放如下
 ```
             BUFF                 VAL
 03 -- -- -- 06 -- -- -- -- -- -- 09
+```
+#### EVEN 伪操作
+#### ALIGN 伪操作
+## 3.2 语句格式
+### 3.2.1 表达式和操作符
+#### 数值回送操作符
+- TYPE
+如果该表达式是变量，则汇编程序将回送该变量以字节数表示的类型，DB 1,DW 2,DD 4,DF 6,DQ 8,DT 10,如果表达式是标号，则汇编程序将回送代表该标号类型的数值，NEAR -1,FAR -2,如果表达式是常数回送0
+- LENGTH
+变量用DUP复制的，回送总变量数，其他为1，但嵌套的DUP不计
+- SIZE
+变量用DUP复制的，回送总字节数，其他为单个变量的字节数，嵌套的DUP不计
+- OFFSET
+回送变量或标号的偏移地址
+- SEG
+回送变量或者标号的段地址
+```
+ORG 0
+VAL=4
+ARR DW 4 DUP(3)
+BUF DW 4 DUP(4 DUP(3))
+DAT DW 15,17,24
+STR DB 'ABCDEF'
+```
+汇编程序对对下面指令汇编的结果为：
+```
+MOV AX,TYPE ARR ;MOV AX,2
+MOV AX,LENGTH ARR ;MOV AX,4
+MOV AX,LENGTH BUF ;MOV AX,4
+MOV AX,LENGTH DAT ;MOV AX,1
+MOV AX,SIZE ARR ;MOV AX,8
+MOV AX,SIZE BUF ;MOV AX,8 不是32
+MOV AX,SIZE DAT ;MOV AX,2
+MOV AX,SIZE STR ;MOV AX,1
+MOV AX,OFFSET ARR ;不完整的机器指令
+MOV BX,SEG ARR ;不完整的机器指令
 ```
