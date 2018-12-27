@@ -209,7 +209,38 @@ MOV BX,OFFSET [2016H]
 MOVS ES:BYTE PTR[DI],DS:[SI]
 ```
 下面介绍前两种格式的操作
+- MOVSB
+```
+ES:DI←DS:DI ;DI+-1,SI+-1
+```
+- MOVSW
+```
+ES:DI←DS:DI ;DI+-2,SI+-2
+```
+上述操作中，当方向标志DF=0时用减，DF=1用加
+
+CLD 正向，向前DF=0
+STD 反向，向后DF=1
 ### 2.CMPS
+- CMPSB
+- CMPSW
+- CMPS
+实际上MOVS指令的寻址方式是固定的，目的串地址为ES:[DI]，原串地址为DS:[SI]
+```
+MOVS ES:BYTE PTR[DI],DS:[SI]
+```
+下面介绍前两种格式的操作
+- CMPSB
+```
+ES:DI-DS:DI ;DI+-1,SI+-1
+```
+- CMPSW
+```
+ES:DI-DS:DI ;DI+-2,SI+-2
+```
+本条串指令把两个串对应位置的字节或字相减，不保存结果，只是根据结果设置标志位，该指令与REPE连用时，可以比较两个串是否相等，在每次比较的过程中，一旦发现不相等，ZF=0，则终止重复执行，不必等到整个串都比较结束
 ### 3.SCAS
 ### 4.STOS
 ### 5.LODS
+
+## 5.程序转移指令
