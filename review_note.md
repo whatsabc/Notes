@@ -579,3 +579,79 @@ MOV AX,SIZE STR ;MOV AX,1
 MOV AX,OFFSET ARR ;不完整的机器指令
 MOV BX,SEG ARR ;不完整的机器指令
 ```
+
+---
+# 宏汇编及其高级伪操作
+## 宏汇编
+### 宏定义 宏调用和宏展开
+#### 宏定义
+```
+SUMN MACRO X,Y,RESULT ;
+  MOV AX,X  ;宏定义体开始
+  ADD AX,Y
+  MOV RESULT,AX
+  ENDM
+```
+#### 宏定义
+```
+SUMN 34,35,BX
+```
+#### 宏展开
+```
+SUMN 34,25,BX   1 MOV AX,34
+                1 ADD AX,25
+                1 MOV BX,AX
+```
+展开后，原来宏指令的地方换成了若干条汇编指令，1是自动加上去的，这些指令是由宏展开得到的
+### 宏定义的嵌套
+用嵌套的宏定义实现两个8位数的算术运算
+```
+MATH MACRO MATHNAME,ACTION,NUM
+MATHNAME MACRO X,Y,RESULT
+  PUSH AX
+  MOV NUM,X
+  ACTION Y
+  MOV RESULT,AX
+  POP AX
+  ENDM
+ENDM
+```
+例如，实施宏调用
+```
+MATH IMULTIPLY,IMUL,AL
+```
+宏展开为有符号数的乘法宏定义：
+```
+IMULTIPLY MACRO X,Y,RESULT
+  PUSH AX
+  MOV AL,X
+  IMUL Y
+  MOV RESULT,AX
+  POP AX
+  ENDM
+ENDM
+```
+### 宏定义中使用宏调用
+例如，用宏定义显示字符
+```
+INT21 MACRO FUNCTION
+MOV AH,FUNCTION
+INT 21H
+ENDM
+DISPC MACRO CHAR
+MOV DL,CHAR
+INT21 2
+ENDM
+```
+宏调用
+```
+DISPC 'A'
+```
+宏展开
+```
+1 MOV DL,'A'
+2 MOV AH,'2'
+2 INT 21H
+```
+这里的2表示第二层展开的结果
+### 带间隔符的实参
