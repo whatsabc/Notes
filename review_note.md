@@ -57,38 +57,38 @@
 立即数就在指令中，这种寻址方式叫做立即寻址方式
 
 例如
-```
+```assembly
 MOV AL,6H
 ```
 需要注意的是，立即数的类型必须与目的操作数的类型一致，目的操作数是字节，立即数也必须是字节，或者两者都是字
 ## 2.2 寄存器寻址方式
 与立即数寻址方式不同的是，立即数是指令的一部分，寄存器寻址方式中的操作数在CPU内部的寄存器中
 
-```
+```assembly
 MOV AX,BX
 ```
 > 以上两种寻址方式都不需要访问内存，以下都需要
 
 ## 2.3 直接寻址方式
 - 1.储存器读操作
-```
+```assembly
 MOV AX,DS:[4050H]
 ```
 - 2.储存器写操作
-```
+```assembly
 MOV DS:[4050H]，AX
 ```
 CPU根据EA和段地址DS计算出物理地址后，再访问储存器取出操作数的数值
 - 3.符号地址
 直接寻址方式除了用数值作为有效地址外，还可以用符号地址的形式。
-```
+```assembly
 VALUE DW 5678H
 MOV AX,VALUE
 MOV AX,[VALUE]
 ```
 - 4.段前缀
 关于内存有关的寻址方式中，操作数的段地址默认为数据段，如果操作数在其他段中存放，称为段超越，需要在指令中用段超越前缀指出，即用操作数前加上段寄存器和冒号来表示
-```
+```assembly
 VALUE EQU 1000H
 MOV AX,DS:[VALUE]
 MOV BX,ES:[VALUE]
@@ -98,7 +98,7 @@ MOV BX,ES:[VALUE]
 操作数的有效地址EA就在寄存器里面，这种寻址方式叫寄存器间接寻址。他把寄存器中的内容作为操作数的地址，而操作数还是在内存中。
 
 需要注意的是，只允许BX BP SI DI
-```
+```assembly
 MOV AX,[BX]
 ```
 ## 2.5 寄存器相对寻址
@@ -107,11 +107,11 @@ MOV AX,[BX]
 - 操作数的物理地址=(DS)x10H+(SI)+8位(16)位位移量
 - 操作数的物理地址=(DS)x10H+(DI)+8位(16)位位移量
 - 操作数的物理地址=(SS)x10H+(BP)+8位(16)位位移量
-```
+```assembly
 MOV AX,TOP[SI]
 ```
 这里TOP是符号地址，即位移量
-```
+```assembly
 MOV [BX+2623H],AX
 或写成MOV [BX].2623H,AX
 ```
@@ -122,7 +122,7 @@ MOV [BX+2623H],AX
 若(IDE77H)=3567H,执行指令后:(AX)=3567H
 
 > 例4.13
-```
+```assembly
 MOV AX,,ARRY[BX]
 MOV AX,[ARRY][BX]
 MOV AX,[ARRY+BX]
@@ -143,7 +143,7 @@ MOV AL,[BX].8H
 - 操作数的物理地址=(SS)x10H+(BP)+(SI)
 - 操作数的物理地址=(SS)x10H+(BP)+(DI)
 
-```
+```assembly
 MOV AX,[BX+DI]
 ```
 执行前:已知(DS)=2100H,(BX)=0158H,(DI)=10ASH,(221FD)=34H,(221FE)=95H,(AX)=0FFFFH。则
@@ -154,7 +154,7 @@ MOV AX,[BX+DI]
 
 执行后，(AX)=9534H
 
-```
+```assembly
 MOV AX,[BX][SI]  ;默认DS寄存器作段地址  
 MOV AX,[BP][DI]  ;默认SS寄存器作段地址  
 MOV AX,ES:[BX][DI]  ;指定ES寄存器作段地址  
@@ -172,7 +172,7 @@ MOV [BP+SI],AL  ;默认SS寄存器作段地址
 - 操作数的物理地址=(SS)x10H+(BP)+(SI)+8位(16位)位移量
 - 操作数的物理地址=(SS)x10H+(BP)+(DI)+8位(16位)位移量
 
-```
+```assembly
 MOV AX,MASK[BX] [SI]  ;默认DS寄存器作段地址
 MOV AX,[MASK+BX+SI] ;默认DS寄存器作段地址
 MOV AX,[BX+SI]MASK ;默认DS寄存器作段地址
@@ -190,32 +190,32 @@ MOV AX,[BX+SI]MASK ;默认DS寄存器作段地址
 ## 3.1 数据传送指令
 ### 3.1.1 通用数据传送指令
 - MOV 传送指令 
-```
+```assembly
 指令格式：MOV DST，SRC  ;(DST)←(SRC) DST表示目的操作数, SRC表示源操作数
 ```
 需要注意的是：
-```
+```assembly
 MOV [BX],0
 ```
 是错误的，上面的指令的源操作数是立即数，长度是不确定的，目的操作数是主存单元，但以低地址访问主存单元时，[BX]并不能说明是字单元还是字节单元，因此长度也是不确定的。
 
 为了解决这个问题，可以将代码改成下面的形式：
-```
+```assembly
 MOV BYTE PTR[BX],0
 MOV WORD PTR[BX],0
 ```
 - PUSH--进栈指令
-```
+```assembly
 指令格式：PUSH  SRC  ;16位指令：(SP)←(SP)–2  ((SP)+1,(SP))←(SRC)
 ```
 SP总是指向栈顶，即大地址。因此入栈时，先将栈顶指针SP-2（2表示2个字节，16位机器字长），以便指向新的内存地址接受16位源操作数，同时指向新的栈顶。堆栈操作以字为单位进行操作
 - POP--标志出栈指令
-```
+```assembly
 指令格式：
 POP DST;(DST)←((SP)+1,(SP)) (SP)←(SP)+2
 ```
 对于PUSH/POP，下面举例：
-```
+```assembly
 MOV BX,1234H
 PUSH BX
 POP AX
@@ -231,7 +231,7 @@ PUSH指令前   PUSH指令后  POP指令后
 ```
 
 - XCHG交换指令
-```
+```assembly
 XCHG OPR1,OPR2
 ```
 操作：
@@ -241,13 +241,13 @@ XCHG OPR1,OPR2
 XCHG是双操作数操作，两个操作数均是目的操作数，除了遵循双操作数指令的规定，也不能使用立即数寻址
 
 举例：
-```
+```assembly
 XCHG AX,BX  ;合法
 XCHG AX,[BX]  ;AX要求[BX]也取字单元
 XCHG AX,VAR ;VAR必须是字变量
 ```
 下面的是错误的
-```
+```assembly
 XCHG AX,5  ;操作数不能为立即数
 XCHG [BX],VAR  ;操作数不能同为内存单元
 XCHG AX,BH ;两个操作数长度必须一致
@@ -258,12 +258,12 @@ XCHG AX,BH ;两个操作数长度必须一致
 ```
 指令格式：LEA  REG，SRC ;(REG)←SRC 
 ```
-```
+```assembly
 LEA BX,TABLE
 MOV BX,OFFSET TABLE
 ```
 上面的指令是等效的
-```
+```assembly
 LEA BX,[2016H]
 MOV BX,OFFSET [2016H]
 ```
@@ -283,12 +283,12 @@ MOV BX,OFFSET [2016H]
 ```
 需要注意的是，加法指令执行后会影响标志寄存器中的CF和OF标志位
 - ADC带进位加法
-```
+```assembly
 ADD AX,CX ;低位相加
 ADC DX,BX ;高位相加
 ```
 - INC加1
-```
+```assembly
 INC OPR
 ```
 ### 3.2.3 减法指令 
@@ -395,16 +395,16 @@ MUL SRC
 - MOVS
 
 实际上MOVS指令的寻址方式是固定的，目的串地址为ES:[DI]，原串地址为DS:[SI]
-```
+```assembly
 MOVS ES:BYTE PTR[DI],DS:[SI]
 ```
 下面介绍前两种格式的操作
 - MOVSB
-```
+```assembly
 ES:DI←DS:DI ;DI+-1,SI+-1
 ```
 - MOVSW
-```
+```assembly
 ES:DI←DS:DI ;DI+-2,SI+-2
 ```
 上述操作中，当方向标志DF=0时用减，DF=1用加
@@ -416,26 +416,26 @@ STD 反向，向后DF=1
 - CMPSW
 - CMPS
 实际上CMPS指令的寻址方式是固定的，目的串地址为ES:[DI]，原串地址为DS:[SI]
-```
+```assembly
 MOVS ES:BYTE PTR[DI],DS:[SI]
 ```
 下面介绍前两种格式的操作
 - CMPSB
-```
+```assembly
 ES:DI-DS:DI ;DI+-1,SI+-1
 ```
 - CMPSW
-```
+```assembly
 ES:DI-DS:DI ;DI+-2,SI+-2
 ```
 本条串指令把两个串对应位置的字节或字相减，不保存结果，只是根据结果设置标志位，该指令与REPE连用时，可以比较两个串是否相等，在每次比较的过程中，一旦发现不相等，ZF=0，则终止重复执行，不必等到整个串都比较结束
 ### 3.4.3 SCAS
 - SCASB
-```
+```assembly
 AL-(ES:DI),DI+-1
 ```
 - SCASW
-```
+```assembly
 AX-(ES:DI),DI+-2
 ```
 - SCAS DST
@@ -497,7 +497,7 @@ AX-(ES:DI),DI+-2
 - SEGMENT/ENDS--段定义伪操作，对此伪操作可以将汇编语言源程序分成几个段，通常是数据段，堆栈段，附加段和代码段
 - ASSUME--段指定伪操作：告诉汇编程序，段和段寄存器的对应关系
 例如：
-```
+```assembly
 DATE SEGMENT
   ...
 DATA ENDS
@@ -518,27 +518,27 @@ END START
 - ?操作数：仅仅给变量保留相应的储存空间，而不进行变量赋初值
 
 ### 4.1.3 类型操作符
-```
+```assembly
 WORD PTR
 BYTE PTR
 ```
 访问内存变量要知道它的符号类型，以便定位，还要知道它的类型参数，以便匹配，如果指令中不可避免地出现两个类型不匹配的操作数时，可以在指令中对该内存变量使用类型属性操作符指定访问类型。
-```
+```assembly
 MOV AX,WORD PTR OPRE1
 MOV BL,BYTE PTR OPER2
 MVO BYTE PTR[DI],0
 ```
 ### 4.1.4 THIS操作符和LABEL伪操作
 使用THIS操作符
-```
+```assembly
 THIS type
 ```
 使用LABEL伪操作
-```
+```assembly
 name LABEL type
 ```
 只是指定一个类型为type的操作数，使该操作数的地址与下一个储存单元的地址相同，type在这里是BYTE,WORD
-```
+```assembly
 BUF=THIS WORD
 DAT DB 8,9
 OPR_B LABEL BYTE
@@ -568,7 +568,7 @@ DAT   OPR_W
 ```
 ### 4.1.5 表达式赋值伪指令EQU和=
 例如
-```
+```assembly
 VALUE EQU 4
 DATE EQU VALUE+5
 ADDR EQU [BP+VALUE]
@@ -585,7 +585,7 @@ EQU不允许重复定义，=伪操作允许重复定义
 汇编语言允许用户直接用$来引用地址计数器的值。如在指令中引用$，JMP $+8的转向地址是本条指令的首地址加上8
 
 例如：
-```
+```assembly
 ARRAY DW 3,$+7,7
 COU=$
 NEW DW COU
@@ -597,11 +597,11 @@ NEW DW COU
 ```
 #### 2.ORG伪操作
 ORG伪操作用来设置当前计数器$的值，其格式为
-```
+```assembly
 ORG constant expression
 ```
 如常数表达式的值为n，则该操作指示下一个字节的存放地址为n
-```
+```assembly
 ORG 0
 DB 3
 ORG 4
@@ -629,7 +629,7 @@ VAL DB 9
 回送变量或标号的偏移地址
 - SEG
 回送变量或者标号的段地址
-```
+```assembly
 ORG 0
 VAL=4
 ARR DW 4 DUP(3)
@@ -638,7 +638,7 @@ DAT DW 15,17,24
 STR DB 'ABCDEF'
 ```
 汇编程序对对下面指令汇编的结果为：
-```
+```assembly
 MOV AX,TYPE ARR ;MOV AX,2
 MOV AX,LENGTH ARR ;MOV AX,4
 MOV AX,LENGTH BUF ;MOV AX,4
@@ -656,7 +656,7 @@ MOV BX,SEG ARR ;不完整的机器指令
 ## 宏汇编
 ### 宏定义 宏调用和宏展开
 #### 宏定义
-```
+```assembly
 SUMN MACRO X,Y,RESULT ;
   MOV AX,X  ;宏定义体开始
   ADD AX,Y
@@ -664,11 +664,11 @@ SUMN MACRO X,Y,RESULT ;
   ENDM
 ```
 #### 宏定义
-```
+```assembly
 SUMN 34,35,BX
 ```
 #### 宏展开
-```
+```assembly
 SUMN 34,25,BX   1 MOV AX,34
                 1 ADD AX,25
                 1 MOV BX,AX
@@ -676,7 +676,7 @@ SUMN 34,25,BX   1 MOV AX,34
 展开后，原来宏指令的地方换成了若干条汇编指令，1是自动加上去的，这些指令是由宏展开得到的
 ### 宏定义的嵌套
 用嵌套的宏定义实现两个8位数的算术运算
-```
+```assembly
 MATH MACRO MATHNAME,ACTION,NUM
 MATHNAME MACRO X,Y,RESULT
   PUSH AX
@@ -688,11 +688,11 @@ MATHNAME MACRO X,Y,RESULT
 ENDM
 ```
 例如，实施宏调用
-```
+```assembly
 MATH IMULTIPLY,IMUL,AL
 ```
 宏展开为有符号数的乘法宏定义：
-```
+```assembly
 IMULTIPLY MACRO X,Y,RESULT
   PUSH AX
   MOV AL,X
@@ -704,7 +704,7 @@ ENDM
 ```
 ### 宏定义中使用宏调用
 例如，用宏定义显示字符
-```
+```assembly
 INT21 MACRO FUNCTION
 MOV AH,FUNCTION
 INT 21H
@@ -715,11 +715,11 @@ INT21 2
 ENDM
 ```
 宏调用
-```
+```assembly
 DISPC 'A'
 ```
 宏展开
-```
+```assembly
 1 MOV DL,'A'
 2 MOV AH,'2'
 2 INT 21H
@@ -729,7 +729,7 @@ DISPC 'A'
 在宏调用中，有时实参使用的是字符串（不是单引号括起来的），而且字符串中包括间隔符（如空格，逗号等），为使得间隔符成为实参的一部分，要用尖括号括起来，作为一个实参的整体来替换形参
 
 例如在数据段中定义40个字节的储存空间
-```
+```assembly
 DEFDB MACRO BUF,X
   BUF X
   ENDM
@@ -738,7 +738,7 @@ DEFDB ARRAY,<DB 40 DUO (?)>
 DATA ENDS
 ```
 宏展开为：
-```
+```assembly
 ARRAY DB40 DUP (?)
 ```
 本例中的宏调用在数据段，数组名和类型长度作为参数，使数组定义更加灵活。但如果宏调用时实参不合适，宏展开时因不能产生合法的语句而不能通过汇编
@@ -747,14 +747,14 @@ ARRAY DB40 DUP (?)
 在宏定义体中，形参可以表现为操作码的一部分，操作数的一部分或者是一个字符串，用连接符&可以连接实参，形成一个完整的符号或者字符串。
 
 例如用操作符&连接实参，形成指令中的操作码
-```
+```assembly
 SHIFT MACRO RIG,M,N
   MOV CL,N
   S&M RIG,CL
   ENDM
 ```
 宏调用
-```
+```assembly
 SHIFT AX,HL,4
 SHIFT DX,HR,2
 ```
@@ -766,7 +766,7 @@ SHIFT DX,HR,2
 1 SHR DX,CL
 ```
 下面这个例子：用操作符&连接实参，生成指令中的操作数
-```
+```assembly
 STUDENT MACRO REC,N,NAME,TEL
   REC DB &N
   REC1 DB '&NAME&,&TEL'
@@ -774,7 +774,7 @@ STUDENT MACRO REC,N,NAME,TEL
   ENDM
 ```
 宏调用：
-```
+```assembly
 STUDENT MSG,1,WANG,12345678
 ```
 宏展开：
@@ -788,13 +788,13 @@ STUDENT MSG,1,WANG,12345678
 前面介绍过实参替换形参，都是直接以实参符号来替换形参。而有些场合需要用实参的值来替换形参，称为宏替换。这时实参符号前面要用宏替换操作符%，结果将%后面的表达式的值转换为当前基数下的数来替换形参
 
 例如，用操作符%将实参的值转换为形参
-```
+```assembly
 STUDENT MACRO REC,N,MSG
   REC&N DB MSG
 ENDM
 ```
 宏调用：
-```
+```assembly
 N=1
 STUDENT NUMB,%N,'WANG,12345678'
 N=N+1
